@@ -38,7 +38,7 @@ namespace BankSystem
                 Console.WriteLine("5. Загрузить данные");
                 Console.WriteLine("6. Просмотреть сохраненные данные");
                 Console.WriteLine("0. Выход из программы");
-                Console.Write("\nВыберите действие (1-5): ");
+                Console.Write("\nВыберите действие (1-6): ");
 
                 switch (Console.ReadLine())
                 {

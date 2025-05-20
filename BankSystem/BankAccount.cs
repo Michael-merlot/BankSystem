@@ -179,14 +179,32 @@ namespace BankSystem
         {
             try
             {
-                BankData bankData = new BankData();
-                string jsonString = JsonSerializer.Serialize(bankData, new JsonSerializerOptions { WriteIndented = true });
+                Console.WriteLine($"Количество счетов в банке перед сохранением: {accounts.Count}");
+                BankData data = ToBankData();
+
+                Console.WriteLine($"Количество счетов в BankData: {data.Accounts.Count}");
+                if (data.Accounts.Count > 0)
+                {
+                    Console.WriteLine("Детали счетов");
+
+                    foreach (var account in data.Accounts)
+                    {
+                        Console.WriteLine($"- Тип: {account.AccountType}, Владелец: {account.Owner}, Баланс: {account.Balance} ");
+                    }
+                }
+
+                string jsonString = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+
+                Console.WriteLine("Первые 200 символов JSON: ");
+                Console.WriteLine(jsonString.Length > 200 ? jsonString.Substring(0, 200) + "..." : jsonString);
+
                 File.WriteAllText(fileName, jsonString);
                 Console.WriteLine($"Данные успешно сохранены в файл {fileName}");
             }
             catch (Exception ex)  
             {
                 Console.WriteLine($"Ошибка при сохранении данных: {ex.Message}");
+                Console.WriteLine($"Стек вызовов: {ex.StackTrace}");
             }
         }
 
