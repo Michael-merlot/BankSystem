@@ -551,34 +551,28 @@ namespace BankSystem
         public void Display()
         {
             ConsoleColor color = ConsoleColor.White;
-            string prefix = "📝";
 
             switch (Type)
             {
                 case NotificationType.LargeDeposit:
                     color = ConsoleColor.Green;
-                    prefix = "💰";
                     break;
                 case NotificationType.LargeWithdrawal:
                     color = ConsoleColor.Red;
-                    prefix = "⚠️";
                     break;
                 case NotificationType.LowBalance:
                     color = ConsoleColor.Yellow;
-                    prefix = "⚠️";
                     break;
                 case NotificationType.SystemMessage:
                     color = ConsoleColor.Cyan;
-                    prefix = "ℹ️";
                     break;
                 case NotificationType.AccountBlocked:
                     color = ConsoleColor.Red;
-                    prefix = "🔒";
                     break;
             }
 
             Console.ForegroundColor = color;
-            Console.WriteLine($"{prefix} {Date.ToString("dd.MM.yyyy HH:mm)")} - {Message}");
+            Console.WriteLine($"{Date.ToString("dd.MM.yyyy HH:mm)")} - {Message}");
             Console.ResetColor();
 
             MarkAsRead();
