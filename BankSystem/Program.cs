@@ -36,6 +36,7 @@ namespace BankSystem
                 Console.WriteLine("3. Показать все счета в банке");
                 Console.WriteLine("4. Сохранить данные");
                 Console.WriteLine("5. Загрузить данные");
+                Console.WriteLine("6. Просмотреть сохраненные данные");
                 Console.WriteLine("0. Выход из программы");
                 Console.Write("\nВыберите действие (1-5): ");
 
@@ -93,6 +94,10 @@ namespace BankSystem
 
                         Console.WriteLine("\nНажмите на любую клавишу для продолжения...");
                         Console.ReadKey();
+                        break;
+
+                    case "6":
+                        ShowAvailableSaves();
                         break;
 
                     case "0":
@@ -424,12 +429,49 @@ namespace BankSystem
 
             string saveFileName = "bank_data.json";
 
-            if(File.Exists(saveFileName))
+            if (File.Exists(saveFileName))
             {
                 FileInfo fileInfo = new FileInfo(saveFileName);
                 Console.WriteLine($"Основное сохранение: {saveFileName}");
                 Console.WriteLine($"Дата изменения: {fileInfo.LastWriteTime}");
+                Console.WriteLine($"Размер: {fileInfo.Length} байт");
+                Console.WriteLine();
             }
+            else
+            {
+                Console.WriteLine("Основное сохранение не найдено");
+                Console.WriteLine();
+            }
+
+            string backupDir = "backups";
+            
+            if (Directory.Exists(backupDir))
+            {
+                FileInfo[] backupFiles = new DirectoryInfo(backupDir).GetFiles("*.json").OrderByDescending(f => f.LastWriteTime).ToArray();
+
+                if (backupFiles.Length > 0)
+                {
+                    Console.WriteLine("Доступные резеврные копии: ");
+
+                    for (int i = 0; i < backupFiles.Length; i++)
+                    {
+                        Console.WriteLine($"{i + 1}. {backupFiles[i].Name}");
+                        Console.WriteLine($"Дата создания: {backupFiles[i].LastWriteTime}");
+                        Console.WriteLine($"Размер: {backupFiles[i].Length} байт");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Резервные копии не найдены");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Папка с резервными копиями не найдена");
+            }
+            Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+            Console.ReadKey();
+
         }
         private static void NotificationMenu(IAccount account, int pin)
         {
