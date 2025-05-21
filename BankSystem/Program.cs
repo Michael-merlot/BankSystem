@@ -61,10 +61,12 @@ namespace BankSystem
                     case "4":
                         Console.Write("Введите имя файла для сохранения (или нажмите Enter для стандартного): ");
                         string saveFile = Console.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(saveFile))
                         {
                             saveFile = saveFileName;
                         }
+
                         bank.SaveToFile(saveFile);
                         Console.WriteLine("\nНажмите на любую клавишу для продолжения...");
                         Console.ReadKey();
@@ -73,6 +75,7 @@ namespace BankSystem
                     case "5":
                         Console.Write("Введите имя файла для загрузки (или нажмите Enter для стандартного): ");
                         string loadFile = Console.ReadLine();
+
                         if (string.IsNullOrWhiteSpace(loadFile))
                         {
                             loadFile = saveFileName;
@@ -87,6 +90,7 @@ namespace BankSystem
                             {
                                 bank = Bank.LoadFromFile(loadFile);
                                 Console.WriteLine($"Данные из файла {loadFile} успешно загружены.");
+                                Console.WriteLine($"Счетов банка: {bank.GetAccountCount()}");
                             }
                         }
                         else

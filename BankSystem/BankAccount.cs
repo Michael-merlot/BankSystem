@@ -48,6 +48,11 @@ namespace BankSystem
             return accounts.FirstOrDefault(account => string.Equals(account.GetOwner(), ownerName, StringComparison.OrdinalIgnoreCase));
         }
 
+        public int GetAccountCount()
+        {
+            return accounts.Count;
+        }
+
         public void Transfer(string fromOwner, string toOwner, decimal amount, int pin)
         {
             var fromAccount = FindAccount(fromOwner);
@@ -144,34 +149,56 @@ namespace BankSystem
         public static Bank FromBankData(BankData bankData)
         {
             Bank bank = new Bank();
+            int succesfullyAdded = 0;
 
             foreach (var accountData in bankData.Accounts)
             {
-                IAccount account;
-
-                if (accountData.AccountType == "Saving")
+                try
                 {
-                    account = new SavingAccount(accountData.Owner, accountData.Balance, accountData.InterestRate, accountData.PinCode);
+                    IAccount account = null;
 
-                    ((SavingAccount)account).LargeTransactionThreshold = accountData.LargeTransactionThreshold;
-                    ((SavingAccount)account).MinBalanceThreshold = accountData.MinBalanceThreshold;
-                    // ((SavingAccount)account).NotificationEnabled = accountData.NotificationsEnabled;
-                }
-                else if (accountData.AccountType == "Credit")
-                {
-                    account = new CreditAccount(accountData.Owner, accountData.CreditLimit, accountData.PinCode);
+                    if (accountData.AccountType == "Saving")
+                    {
+                        account = new SavingAccount(accountData.Owner, accountData.Balance, accountData.InterestRate, accountData.PinCode);
 
-                    ((CreditAccount)account).Balance = accountData.Balance;
-                    ((CreditAccount)account).LargeTransactionThreshold = accountData.LargeTransactionThreshold;
-                    ((CreditAccount)account).MinBalanceThreshold = accountData.MinBalanceThreshold;
-                    // ((CreditAccount)account).NotificationEnabled = accountData.NotificationsEnabled;
+                        ((SavingAccount)account).LargeTransactionThreshold = accountData.LargeTransactionThreshold;
+                        ((SavingAccount)account).MinBalanceThreshold = accountData.MinBalanceThreshold;
+                        // ((SavingAccount)account).NotificationEnabled = accountData.NotificationsEnabled;
+
+                        Console.WriteLine($"Создан сберегательный счёт для {accountData.Owner} с балансом: {accountData.Balance}");
+                    }
+                    else if (accountData.AccountType == "Credit")
+                    {
+                        account = new CreditAccount(accountData.Owner, accountData.CreditLimit, accountData.PinCode);
+
+                        ((CreditAccount)account).Balance = accountData.Balance;
+                        ((CreditAccount)account).LargeTransactionThreshold = accountData.LargeTransactionThreshold;
+                        ((CreditAccount)account).MinBalanceThreshold = accountData.MinBalanceThreshold;
+                        // ((CreditAccount)account).NotificationEnabled = accountData.NotificationsEnabled;
+
+                        Console.WriteLine($"Создан кредитный счёт для {accountData.Owner} с балансом: {accountData.Balance}");
+                    }
+
+                    if (account != null)
+                    {
+                        bank.AddAccount(account);
+                        succesfullyAdded++;
+
+                        if (account is BankAccount BankAccount)
+                        {
+                            BankAccount.RestoreTransactions(accountData.Transactions);
+                            BankAccount.RestoreNotifications(accountData.Notifications);
+                        }
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    continue;
+                    Console.WriteLine($"Ошибка при создании сч`та: {ex.Message}");
                 }
+                
             }
 
+            Console.WriteLine($"Успешно добавлено счетов: {succesfullyAdded} из {bankData.Accounts.Count}");
             return bank;
         }
 
@@ -214,10 +241,16 @@ namespace BankSystem
             {
                 if (File.Exists(fileName))
                 {
+                    Console.WriteLine($"Файл {fileName} найден. Читаем содержимое...");
                     string jsonString = File.ReadAllText(fileName);
+                    Console.WriteLine($"Файл прочитан, длина содержимого: {jsonString.Length} символов");
+
                     BankData bankData = JsonSerializer.Deserialize<BankData>(jsonString);
+                    Console.WriteLine($"Десериалзиация успешна, найдено счетов: {bankData.Accounts.Count}")
+                        ;
                     Bank bank = FromBankData(bankData);
                     Console.WriteLine($"Данные успешно загружены из файла {fileName}");
+                    Console.WriteLine($"Счетов в банке: {bank.GetAccountCount()}");
                     return bank;
                 }
                 else
@@ -229,6 +262,7 @@ namespace BankSystem
             catch (Exception ex)
             {
                 Console.WriteLine($"Ошибка при загрузке данных: {ex.Message}");
+                Console.WriteLine($"Подробности: {ex.StackTrace}");
                 return new Bank();
             }
         }
