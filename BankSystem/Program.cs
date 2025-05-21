@@ -1,6 +1,7 @@
 ﻿using BankSystem;
 using System;
 using System.ComponentModel.Design;
+using System.Text.Json;
 
 namespace BankSystem
 {
@@ -37,8 +38,9 @@ namespace BankSystem
                 Console.WriteLine("4. Сохранить данные");
                 Console.WriteLine("5. Загрузить данные");
                 Console.WriteLine("6. Просмотреть сохраненные данные");
+                Console.WriteLine("7. Загрузить данные с файла");
                 Console.WriteLine("0. Выход из программы");
-                Console.Write("\nВыберите действие (1-6): ");
+                Console.Write("\nВыберите действие (1-7): ");
 
                 switch (Console.ReadLine())
                 {
@@ -98,6 +100,10 @@ namespace BankSystem
 
                     case "6":
                         ShowAvailableSaves();
+                        break;
+
+                    case "7":
+                        LoadingFromFile();
                         break;
 
                     case "0":
@@ -422,6 +428,72 @@ namespace BankSystem
             Console.ReadKey();
         }
 
+        private static void LoadingFromFile()
+        {
+            Console.Clear();
+            Console.WriteLine("=== ЗАГРУЗКА ДАННЫХ ИЗ ФАЙЛА ===");
+
+            Console.Write("Напишите название файла, откуда будет чтение данных: ");
+            string loadFile = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(loadFile))
+            {
+                loadFile = "bank_data.json";
+                Console.WriteLine($"Используем файл по умолчанию: {loadFile}");
+            }
+
+            if (File.Exists(loadFile))
+            {
+                Console.WriteLine("Файл был обнаружен");
+                FileInfo fileInfo = new FileInfo(loadFile);
+
+                Console.WriteLine($"Сохранение с именем: {loadFile}");
+                Console.WriteLine($"Дата изменения: {fileInfo.LastWriteTime}");
+                Console.WriteLine($"Размер: {fileInfo.Length} байт");
+                Console.WriteLine();
+
+                try
+                {
+                    string jsonContent = File.ReadAllText(loadFile);
+                    BankData bankData = JsonSerializer.Deserialize<BankData>(jsonContent);
+                    Console.WriteLine($"Загрузка счетов: {bankData.Accounts.Count}");
+
+                    if (bankData.Accounts.Count > 0)
+                    {
+                        Console.WriteLine("\nИнформация о счетах: ");
+
+                        foreach (var account in bankData.Accounts)
+                        {
+                            Console.WriteLine($"- Тип аккаунта: {account.AccountType}");
+                            Console.WriteLine($"  Владелец: {account.Owner}");
+                            Console.WriteLine($"  Баланс: {account.Balance}");
+                            Console.WriteLine($"  Транзакций: {account.Transactions.Count}");
+                            Console.WriteLine($"  Уведомлений: {account.Notifications.Count}");
+                            Console.WriteLine();
+                        }
+
+                        Bank loadedBank = Bank.FromBankData(bankData);
+
+                        Console.WriteLine("Данные успешно загружены");
+
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка при чтении или обработки файла: {ex.Message}");
+                    Console.WriteLine($"Подробности: {ex.StackTrace}");
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Файл {loadFile} не найдены");
+            }
+
+            Console.WriteLine("\nНажмите любую клавишу для продолжения...");
+            Console.ReadKey();
+
+        }
         private static void ShowAvailableSaves()
         {
             Console.Clear();

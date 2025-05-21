@@ -301,7 +301,7 @@ namespace BankSystem
             }
         }
 
-        public void PrintTransaction()
+        public void PrintTransaction() // надо будет доделать ИЛИ переделать
         {
             Console.WriteLine("----------");
             Console.WriteLine($"История операций для {Owner}");
